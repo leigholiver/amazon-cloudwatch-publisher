@@ -504,18 +504,11 @@ def push_log_data():
 
 
 # Do one-time setup functions
-configure_logging()
 set_instance_id()
 set_credentials()
 
-# Populate the global data tables
-initialize_metric_table()
-initialize_log_table()
-
-
 # Build out the object that managers period function calls
 tl = timeloop.Timeloop()
-
 
 @tl.job(interval=datetime.timedelta(seconds=credentials_interval))
 def refresh_credentials():
@@ -525,24 +518,32 @@ def refresh_credentials():
     except Exception as error:
         logging.warning('Error while refreshing credentials: {0}'.format(error))
 
+if metric_interval:
+    # Do one-time setup for metrics
+    initialize_metric_table()
 
-@tl.job(interval=datetime.timedelta(seconds=metric_interval))
-def put_metrics():
-    """Gather the latest metric values, the publish them to CloudWatch."""
-    try:
-        refresh_metric_table()
-        push_metric_data()
-    except Exception as error:
-        logging.warning('Error while pushing metrics: {0}'.format(error))
+    @tl.job(interval=datetime.timedelta(seconds=metric_interval))
+    def put_metrics():
+        """Gather the latest metric values, the publish them to CloudWatch."""
+        try:
+            refresh_metric_table()
+            push_metric_data()
+        except Exception as error:
+            logging.warning('Error while pushing metrics: {0}'.format(error))
 
 
-@tl.job(interval=datetime.timedelta(seconds=logs_interval))
-def put_logs():
-    """Publish new log events to CloudWatch."""
-    try:
-        push_log_data()
-    except Exception as error:
-        logging.warning('Error while pushing logs: {0}'.format(error))
+if logs_interval:
+    # Do one-time setup for logs
+    configure_logging()
+    initialize_log_table()
+
+    @tl.job(interval=datetime.timedelta(seconds=logs_interval))
+    def put_logs():
+        """Publish new log events to CloudWatch."""
+        try:
+            push_log_data()
+        except Exception as error:
+            logging.warning('Error while pushing logs: {0}'.format(error))
 
 
 # Run the above periodic functions forever

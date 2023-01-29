@@ -59,14 +59,14 @@ This section contains general configuration for the script. All keys are optiona
    the region configured via the AWS CLI profile (environment variable or `~/.aws/config` file) is used.
 
 *  `metrics_collection_interval`: How often (in seconds) metric values should be sent to CloudWatch.
-   Defaults to 300 seconds (5 minutes) if not provided.
+   Defaults to 300 seconds (5 minutes) if not provided. Set to `false` to disable metric collection.
 
 *  `logs_collection_interval`: How often (in seconds) outstanding log entries should be sent to
    CloudWatch. Defaults to 10 seconds if not provided. This needs to be set to strike a balance
    between being too chatty and waiting too long to send logs that are rapidly generated, as there
    is a limit on how much log data can be sent in a single call to CloudWatch, see the
    [put-log-events](https://docs.aws.amazon.com/cli/latest/reference/logs/put-log-events.html)
-   doc page for details.
+   doc page for details. Set to `false` to disable log collection.
 
 *  `logfile`: Full path and filename to which the publisher's own log file should be written. Defaults to
    `/opt/aws/amazon-cloudwatch-publisher/logs/amazon-cloudwatch-publisher.log` (to mimic the default agent)
